@@ -3,8 +3,9 @@ from datetime import datetime, timedelta
 import requests
 from common import read_line_from
 from routine import article, routine
+from ui import Label
 
-REFRESH_INTERVAL = 15 # in seconds
+REFRESH_INTERVAL = 20 # in seconds
 CACHE_LIFE = timedelta(minutes = 30)
 URL = read_line_from('sensors_url.txt')
 URL_OUT = URL +'/get?json'
@@ -77,16 +78,15 @@ class readings:
             if in_routine and self.cache_invalid():
                 try:
                     self.update_readings()
-                    self.rasp_b.config(text = self.last_rasp_b)
-                    self.rasp_c.config(text = self.last_rasp_c)
+                    self.queue.put((Label.rasp_b, self.last_rasp_b))
+                    self.queue.put((Label.rasp_c, self.last_rasp_c))
                 except:
                     # OK, so maybe no Internet then? Show an error and carry on.
                     self.rasp_b.config(text = 'Error getting data')
 
             await asyncio.sleep(REFRESH_INTERVAL)
 
-    def __init__(self, routine, rasp_b, rasp_c):
+    def __init__(self, routine, queue):
         self.routine = routine
-        self.rasp_b = rasp_b
-        self.rasp_c = rasp_c
+        self.queue = queue
         self.last_update = datetime.min

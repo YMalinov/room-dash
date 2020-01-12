@@ -4,7 +4,7 @@ from datetime import datetime
 import common as c
 from routine import article, routine
 
-REFRESH_INTERVAL = 5 # in secs
+REFRESH_INTERVAL = 10 # in secs
 
 class monitor:
     def turn_on(self):
@@ -19,6 +19,8 @@ class monitor:
 
     def turn_off(self):
         print('Turning monitor off...')
+        # TODO: check if perma-on is enabled; maybe have it as a file, created
+        # or destroyed by rouser-pi server.
 
         self.output = False
 

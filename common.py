@@ -16,8 +16,7 @@ def get_time(string):
 
 MON, TUE, WED, THU, FRI, SAT, SUN = range(7)
 morning_routine = routine(
-    # schedule = [ article(get_time('08:00'), get_time('09:00')) ],
-    schedule = [ article(get_time('20:50:00'), get_time('20:50:30')) ],
+    schedule = [ article(get_time('07:55'), get_time('08:55')) ],
     weekdays = {
         MON: True,
         TUE: True,
@@ -25,8 +24,7 @@ morning_routine = routine(
         THU: True,
         FRI: True,
         SAT: False,
-        # SUN: False,
-        SUN: True,
+        SUN: False,
     }
 )
 

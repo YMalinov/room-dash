@@ -9,13 +9,10 @@ from routine import article, routine
 from monitor import monitor
 from readings import readings
 
-root = ui.get_root()
-app = ui.get_app(root)
-ui.put_clock(root)
-rasp_b, rasp_c = ui.put_readings(root)
+app = ui.get_app()
 
 monitor = monitor(c.morning_routine)
-readings = readings(c.morning_routine, rasp_b, rasp_c)
+readings = readings(c.morning_routine, app.get_queue())
 
 def worker():
     loop = asyncio.new_event_loop()
@@ -24,7 +21,7 @@ def worker():
     loop.create_task(readings.update_state()) # reads sensor data
     loop.run_forever()
 
-worker_thread = threading.Thread(target=worker)
+worker_thread = threading.Thread(target = worker)
 try:
     worker_thread.start()
     app.mainloop()
