@@ -52,7 +52,10 @@ class routine:
 
         beginning = self.schedule[0].start
         end = self.schedule[-1].end
-        if beginning.time() <= time.time() <= end.time():
-            return True
 
-        return False
+        for item in self.schedule:
+            if item.start.time() <= time.time() <= item.end.time():
+                return True
+        else:
+            return False
+

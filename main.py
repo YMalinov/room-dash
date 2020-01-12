@@ -4,15 +4,15 @@ import threading
 import asyncio
 import sys
 import ui
-import common as c
+import common
 from routine import article, routine
 from monitor import monitor
 from readings import readings
 
 app = ui.get_app()
 
-monitor = monitor(c.morning_routine)
-readings = readings(c.morning_routine, app.get_queue())
+monitor = monitor(common.routine)
+readings = readings(common.routine, app.get_queue())
 
 def worker():
     loop = asyncio.new_event_loop()

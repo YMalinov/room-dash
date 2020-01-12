@@ -15,8 +15,12 @@ def get_time(string):
     raise ValueError('unexpected datetime format', string)
 
 MON, TUE, WED, THU, FRI, SAT, SUN = range(7)
-morning_routine = routine(
-    schedule = [ article(get_time('07:55'), get_time('08:55')) ],
+routine = routine(
+    # Won't work when start time is still on the previous day.
+    schedule = [
+        article(get_time('07:55'), get_time('08:55')),
+        article(get_time('21:00'), get_time('22:00')),
+    ],
     weekdays = {
         MON: True,
         TUE: True,
