@@ -82,7 +82,7 @@ class readings:
                     self.queue.put((Label.rasp_c, self.last_rasp_c))
                 except:
                     # OK, so maybe no Internet then? Show an error and carry on.
-                    self.rasp_b.config(text = 'Error getting data')
+                    self.queue.put((Label.rasp_b, 'Error getting data'))
 
             await asyncio.sleep(REFRESH_INTERVAL)
 
