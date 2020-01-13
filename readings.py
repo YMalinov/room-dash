@@ -5,21 +5,21 @@ from common import read_line_from
 from routine import article, routine
 from ui import Label
 
-REFRESH_INTERVAL = 20 # in seconds
-CACHE_LIFE = timedelta(minutes = 30)
+REFRESH_INTERVAL = 10 # in seconds
+CACHE_LIFE = timedelta(minutes = 20)
 URL = read_line_from('sensors_url.txt')
 URL_OUT = URL +'/get?json'
 URL_IN = URL + '/get?client=rasp_c&json'
-ALLOWED_KEYS = [
-    'client',
-    'timestamp_pretty',
-    # 'bme_humidity',
-    # 'bme_pressure',
-    'ds18_short_temp',
-    'ds18_long_temp',
-    'pm10_aqi_label',
-    'pm25_aqi_label',
-]
+KEYS = {
+    'client': 'Client',
+    'timestamp_pretty': 'When',
+    # 'bme_humidity': 'Humidity',
+    # 'bme_pressure': 'Pressure',
+    'ds18_short_temp': 'Outside temp',
+    'ds18_long_temp': 'Inside temp',
+    'pm25_aqi_label': 'PM25 label',
+    'pm10_aqi_label': 'PM10 label',
+}
 
 class readings:
     def get_data(self):
@@ -35,32 +35,21 @@ class readings:
 
         return outside, inside
 
-    def filter_json(self, json):
-        output = {}
-        for k, v in json.items():
-            if k in ALLOWED_KEYS:
-                output.update({k: v})
-
-        return output
-
-    def format_json(self, json):
+    def format(self, json):
         output = ''
 
-        # get sorting from ALLOWED_KEYS
-        for key in ALLOWED_KEYS:
+        # get sorting from KEYS
+        for key, value in KEYS.items():
             if key in json:
-                output += '%s: %s\n' % (key, json[key])
+                output += '%s: %s\n' % (value, json[key])
 
         return output
 
     def update_readings(self):
         outside, inside = self.get_data()
 
-        outside = self.filter_json(outside)
-        inside = self.filter_json(inside)
-
-        self.last_rasp_b = self.format_json(outside)
-        self.last_rasp_c = self.format_json(inside)
+        self.last_rasp_b = self.format(outside)
+        self.last_rasp_c = self.format(inside)
         self.last_update = datetime.now()
 
     def cache_invalid(self):
@@ -80,7 +69,7 @@ class readings:
                     self.update_readings()
                     self.queue.put((Label.rasp_b, self.last_rasp_b))
                     self.queue.put((Label.rasp_c, self.last_rasp_c))
-                except:
+                except requests.exceptions.RequestException:
                     # OK, so maybe no Internet then? Show an error and carry on.
                     self.queue.put((Label.rasp_b, 'Error getting data'))
 

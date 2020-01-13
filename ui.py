@@ -1,7 +1,10 @@
 import tkinter as tk
-from time import strftime
+from datetime import datetime, timedelta
 from queue import Queue
 from enum import Enum, unique
+
+offset = timedelta(minutes = 1) # will show the time with this offset applied
+time_format = '%H:%M:%S %p'
 
 @unique
 class Label(Enum):
@@ -45,9 +48,11 @@ def get_app():
 
         def construct_clock(self):
             def update_time():
-                label = strftime('%H:%M:%S %p')
+                now = datetime.now()
+                massaged = now - offset
+                label = massaged.strftime(time_format)
                 self.queue.put((Label.clock, label))
-                self.clock.after(500, update_time) # will be accurate up to +/- 500 ms
+                self.clock.after(100, update_time)
 
             self.clock = tk.Label(self.master,
                 font = ('calibri', 90, 'bold'),
@@ -55,7 +60,6 @@ def get_app():
                 foreground = 'white')
 
             self.clock.grid(row = 1, columnspan = 2, sticky = tk.N)
-
             update_time()
 
         def construct_readings(self):

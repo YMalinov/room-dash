@@ -4,7 +4,7 @@ from datetime import datetime
 import common as c
 from routine import article, routine
 
-REFRESH_INTERVAL = 10 # in secs
+REFRESH_INTERVAL = 5 # in secs
 
 class monitor:
     def turn_on(self):
@@ -13,8 +13,6 @@ class monitor:
         # or destroyed by rouser-pi server.
 
         self.output = True
-
-        # TODO: check if os.system is a blocking operation
         return os.system('vcgencmd display_power 1')
 
     def turn_off(self):
@@ -23,7 +21,6 @@ class monitor:
         # or destroyed by rouser-pi server.
 
         self.output = False
-
         return os.system('vcgencmd display_power 0')
 
     def weekday_permits(self):
