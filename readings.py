@@ -8,7 +8,8 @@ from ui import Label
 REFRESH_INTERVAL = 10 # in seconds
 CACHE_LIFE = timedelta(minutes = 20)
 URL = read_line_from('sensors_url.txt')
-URL_OUT = URL +'/get?json'
+URL_OUT = URL + '/get?json'
+URL_OUT_AVG = URL + '/get?json&days=1' # average for last day
 URL_IN = URL + '/get?client=rasp_c&json'
 KEYS = {
     'client': 'Client',
@@ -17,8 +18,10 @@ KEYS = {
     # 'bme_pressure': 'Pressure',
     'ds18_short_temp': 'Outside temp',
     'ds18_long_temp': 'Inside temp',
-    'pm25_aqi_label': 'PM25 label',
+    'pm25_aqi_label': 'PM2.5 label',
+    'pm25_aqi_label_avg': 'PM2.5 label day avg',
     'pm10_aqi_label': 'PM10 label',
+    'pm10_aqi_label_avg': 'PM10 label day avg',
 }
 
 class readings:
@@ -27,13 +30,14 @@ class readings:
         for i in range(max_exception_count):
             try:
                 outside = requests.get(URL_OUT).json()
+                avg_outside = requests.get(URL_OUT_AVG).json()
                 inside = requests.get(URL_IN).json()
-            except:
+            except requests.exceptions.RequestException:
                 natural = i + 1
                 if natural == max_exception_count: raise
                 print('Couldn\'t get info from server, attempt:', natural)
 
-        return outside, inside
+        return outside, avg_outside, inside
 
     def format(self, json):
         output = ''
@@ -46,7 +50,11 @@ class readings:
         return output
 
     def update_readings(self):
-        outside, inside = self.get_data()
+        outside, avg_outside, inside = self.get_data()
+
+        # Add labels per last day average.
+        outside['pm25_aqi_label_avg'] = avg_outside['pm25_aqi_label']
+        outside['pm10_aqi_label_avg'] = avg_outside['pm10_aqi_label']
 
         self.last_rasp_b = self.format(outside)
         self.last_rasp_c = self.format(inside)
