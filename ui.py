@@ -3,7 +3,8 @@ from datetime import datetime, timedelta
 from queue import Queue
 from enum import Enum, unique
 
-offset = timedelta(minutes = 1) # will show the time with this offset applied
+# will show the time with this offset applied
+offset = timedelta(minutes = 1, seconds = 20)
 time_format = '%H:%M:%S %p'
 
 @unique
@@ -49,7 +50,7 @@ def get_app():
         def construct_clock(self):
             def update_time():
                 now = datetime.now()
-                massaged = now - offset
+                massaged = now + offset
                 label = massaged.strftime(time_format)
                 self.queue.put((Label.clock, label))
                 self.clock.after(100, update_time)

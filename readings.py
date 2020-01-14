@@ -6,7 +6,7 @@ from routine import article, routine
 from ui import Label
 
 REFRESH_INTERVAL = 10 # in seconds
-CACHE_LIFE = timedelta(minutes = 20)
+CACHE_LIFE = timedelta(minutes = 15)
 URL = read_line_from('sensors_url.txt')
 URL_OUT = URL + '/get?json'
 URL_OUT_AVG = URL + '/get?json&days=1' # average for last day
