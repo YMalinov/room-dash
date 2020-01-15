@@ -19,7 +19,7 @@ routine = routine(
     # Won't work when start time is still on the previous day.
     schedule = [
         article(get_time('07:55'), get_time('08:55')),
-        article(get_time('20:00'), get_time('22:00')),
+        article(get_time('20:00'), get_time('22:30')),
     ],
     weekdays = {
         MON: True,
