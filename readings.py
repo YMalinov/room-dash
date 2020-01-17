@@ -71,9 +71,11 @@ class readings:
                 tries = 3 # to connect with server
                 for i in range(tries):
                     try:
-                        print('Cache expired @', datetime.now())
+                        print('Readings cache expired @', datetime.now())
                         self.update_readings()
                         print('Updated readings @', self.last_update)
+
+                        break
                     except (requests.exceptions.RequestException,
                             json.decoder.JSONDecodeError):
                         # OK, so maybe no Internet then? Show an error and carry on.
