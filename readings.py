@@ -77,7 +77,7 @@ class readings:
 
                         break
                     except (requests.exceptions.RequestException,
-                            json.decoder.JSONDecodeError):
+                            ValueError): # includes JSONDecodeError
                         # OK, so maybe no Internet then? Show an error and carry on.
                         self.queue.put((
                             Label.rasp_b,
