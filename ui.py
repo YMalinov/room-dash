@@ -6,7 +6,7 @@ from enum import Enum, unique, auto
 # will show the time with this offset applied
 offset = timedelta(minutes = 1, seconds = 20)
 time_format = '%H:%M:%S %p'
-date_format = '%B %-d, %Y; week %-W' # the hyphens remove the trailing zeroes
+date_format = '%a %b %-d; week %-W of %Y' # the hyphens remove the trailing zeroes
 
 @unique
 class Label(Enum):
