@@ -16,9 +16,9 @@ def get_time(string):
 
 MON, TUE, WED, THU, FRI, SAT, SUN = range(7)
 routine = routine(
-    # Won't work when start time is still on the previous day.
+    # Won't work if start time is still on the previous day.
     schedule = [
-        article(get_time('07:55'), get_time('08:55')),
+        article(get_time('07:50'), get_time('09:00')),
         article(get_time('20:00'), get_time('22:30')),
     ],
     weekdays = {
