@@ -2,7 +2,6 @@ import asyncio
 from datetime import datetime, timedelta
 import requests, json
 from common import read_line_from
-from routine import article, routine
 from ui import Label
 
 GET_TIMEOUT = 20
@@ -62,12 +61,21 @@ class readings:
 
         return False
 
+    # We get these readings from the _home-sensors_ project, which is served on
+    # a free-quota-using Google Cloud server. In order to remain within the free
+    # quota indefinitely, let's try to hit it as less frequently as possible. We
+    # can use two ways of achieving that:
+    #   1. Use a cache for the readings received - considering their values
+    #   don't currently get updated often, it's OK to have this set at a
+    #   CACHE_LIFE time delta.
+    #   2. Only update the cache while the monitor showing it is actually
+    #   powered (regardless of its routine).
     async def update_state(self):
         while True:
             now = datetime.now()
 
-            in_routine = self.routine.in_routine(now)
-            if in_routine and self.cache_old():
+            monitor_on = self.monitor.status()
+            if monitor_on and self.cache_old():
                 tries = 3 # to connect with server
                 for i in range(tries):
                     try:
@@ -78,7 +86,9 @@ class readings:
                         break
                     except (requests.exceptions.RequestException,
                             ValueError): # includes JSONDecodeError
-                        # OK, so maybe no Internet then? Show an error and carry on.
+
+                        # OK, so maybe no Internet then? Display an error and
+                        # carry on trying.
                         self.queue.put((
                             Label.rasp_b,
                             'Error getting data, try: %i' % (i + 1)
@@ -86,7 +96,7 @@ class readings:
 
             await asyncio.sleep(REFRESH_INTERVAL)
 
-    def __init__(self, routine, queue):
-        self.routine = routine
+    def __init__(self, monitor, queue):
+        self.monitor = monitor
         self.queue = queue
         self.last_update = datetime.min

@@ -1,31 +1,39 @@
 import asyncio
-import os
+import os, subprocess
 from datetime import datetime
-import common as c
 from routine import article, routine
 
 REFRESH_INTERVAL = 5 # in secs
+CMD = ['vcgencmd', 'display_power']
 
 class monitor:
     def turn_on(self):
         print('Turning monitor on...')
-        # TODO: check if perma-off is enabled; maybe have it as a file, created
-        # or destroyed by rouser-pi server.
 
         self.output = True
-        return os.system('vcgencmd display_power 1')
+        if self.is_rasp: subprocess.run(CMD + ['1'])
 
     def turn_off(self):
         print('Turning monitor off...')
-        # TODO: check if perma-on is enabled; maybe have it as a file, created
-        # or destroyed by rouser-pi server.
 
         self.output = False
-        return os.system('vcgencmd display_power 0')
+        if self.is_rasp: subprocess.run(CMD + ['0'])
 
-    def weekday_permits(self):
-        current = datetime.now().weekday()
-        return self.weekdays[current]
+    # This method purposefully doesn't take into account the project's actual
+    # routine (otherwise it would just return the state of self.output), as the
+    # monitor's actual state can be overwritten by the _rouser-pi_ project's
+    # routes for dealing with the monitor's power.
+    def status(self):
+        if not self.is_rasp:
+            return True
+
+        # result from the following cmd would be as follows:
+        #   display_power=1
+        cmd_result = subprocess.run(CMD, capture_output = True)
+
+        # piping meant to transform the above result to a simple boolean
+        pretty = cmd_result.stdout.decode('utf-8').strip().split('=')[1] == '1'
+        return pretty
 
     async def update_state(self):
         while True:
@@ -38,9 +46,10 @@ class monitor:
             elif not in_routine and self.output:
                 self.turn_off()
 
-    def __init__(self, rout):
+    def __init__(self, rout, is_rasp):
         if not isinstance(rout, routine):
             raise TypeError('rout isn\'t a routine.routine object')
 
         self.routine = rout
+        self.is_rasp = is_rasp
         self.turn_off()
