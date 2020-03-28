@@ -80,7 +80,10 @@ class readings:
                 for i in range(tries):
                     try:
                         print('Readings cache expired @', datetime.now())
+
+                        # TODO: spawn a new thread; then do this:
                         self.update_readings()
+
                         print('Updated readings @', self.last_update)
 
                         break
