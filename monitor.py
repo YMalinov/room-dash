@@ -24,8 +24,7 @@ class monitor:
     # monitor's actual state can be overwritten by the _rouser-pi_ project's
     # routes for dealing with the monitor's power.
     def status(self):
-        if not self.is_rasp:
-            return True
+        if not self.is_rasp: return True
 
         # result from the following cmd would be as follows:
         #   display_power=1

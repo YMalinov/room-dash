@@ -6,7 +6,7 @@ from enum import Enum, unique, auto
 # will show the time with this offset applied
 offset = timedelta(minutes = 1, seconds = 20)
 time_format = '%H:%M:%S'
-date_format = '%a %b %-d; week %-W of %Y' # the hyphens remove the trailing zeroes
+date_format = '%a %b %-d; week %-W of %Y' # hyphens remove the leading zeroes
 
 @unique
 class Label(Enum):
@@ -99,16 +99,16 @@ def get_app():
             self.rasp_c.grid(row = 3, column = 1, sticky = tk.N)
 
         def process_incoming(self):
+            mapping = {
+                Label.clock: self.clock,
+                Label.date: self.date,
+                Label.rasp_b: self.rasp_b,
+                Label.rasp_c: self.rasp_c,
+            }
+
             while self.queue.qsize():
                 try:
                     label, value = self.queue.get(0)
-                    mapping = {
-                        Label.clock: self.clock,
-                        Label.date: self.date,
-                        Label.rasp_b: self.rasp_b,
-                        Label.rasp_c: self.rasp_c,
-                    }
-
                     mapping[label].config(text = value)
                 except Queue.Empty:
                     pass

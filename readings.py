@@ -1,16 +1,23 @@
 import asyncio
+import aiohttp
+from aiohttp import web
+from aiohttp import client_exceptions as client_ex
 from datetime import datetime, timedelta
-import requests, json
+
 from common import read_line_from
 from ui import Label
 
-GET_TIMEOUT = 20
+SERVER_TIMEOUT = aiohttp.ClientTimeout(total = 20) # in seconds
 REFRESH_INTERVAL = 10 # in seconds
 CACHE_LIFE = timedelta(minutes = 20)
-URL = read_line_from('sensors_url.txt')
-URL_OUT = URL + '/get?json'
-URL_OUT_AVG = URL + '/get?json&days=1' # average for last day
-URL_IN = URL + '/get?client=rasp_c&json'
+
+base_url = read_line_from('sensors_url.txt')
+URLS = [
+    f'{base_url}/get?client=rasp_b&json', # current readings outside
+    f'{base_url}/get?client=rasp_c&json', # current readings inside
+    f'{base_url}/get?client=rasp_b&json&days=1', # averages for past day (outside)
+]
+
 KEYS = {
     'client': 'Client',
     'timestamp_pretty': 'When',
@@ -25,13 +32,14 @@ KEYS = {
 }
 
 class readings:
-    def get_data(self):
-        outside, avg_outside, inside = [
-            requests.get(u, timeout = GET_TIMEOUT).json() \
-            for u in [ URL_OUT, URL_OUT_AVG, URL_IN ]
-        ]
+    async def get_data(self):
+        results = []
+        async with aiohttp.ClientSession() as session:
+            for url in URLS:
+                async with session.get(url, timeout = SERVER_TIMEOUT) as resp:
+                    results.append(await resp.json())
 
-        return outside, avg_outside, inside
+        return results
 
     def format(self, json):
         output = ''
@@ -43,8 +51,8 @@ class readings:
 
         return output
 
-    def update_readings(self):
-        outside, avg_outside, inside = self.get_data()
+    async def update_readings(self):
+        outside, inside, avg_outside = await self.get_data()
 
         # Add labels per last day average.
         outside['pm25_aqi_label_avg'] = avg_outside['pm25_aqi_label']
@@ -81,17 +89,15 @@ class readings:
                     try:
                         print('Readings cache expired @', datetime.now())
 
-                        # TODO: spawn a new thread; then do this:
-                        self.update_readings()
+                        await self.update_readings()
 
                         print('Updated readings @', self.last_update)
 
                         break
-                    except (requests.exceptions.RequestException,
-                            ValueError): # includes JSONDecodeError
+                    except (web.HTTPException, client_ex.ContentTypeError):
 
-                        # OK, so maybe no Internet then? Display an error and
-                        # carry on trying.
+                        # OK, so maybe spotty Internet connectivity? Display an
+                        # error and carry on trying.
                         self.queue.put((
                             Label.rasp_b,
                             'Error getting data, try: %i' % (i + 1)

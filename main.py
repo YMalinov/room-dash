@@ -28,6 +28,7 @@ def worker():
     loop.run_forever()
 
 worker_thread = threading.Thread(target = worker)
+worker_thread.daemon = True # ensures cleaner exit on SIGINT
 try:
     worker_thread.start()
     app.mainloop()

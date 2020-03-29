@@ -6,7 +6,7 @@ time_format = '%H:%M'
 time_format_sec = '%H:%M:%S'
 
 # Expecting format to be either '09:00' or '09:01:32'
-def get_time(string):
+def time(string):
     if string.count(':') == 1:
         return datetime.strptime(string, time_format)
     elif string.count(':') == 2:
@@ -18,10 +18,10 @@ MON, TUE, WED, THU, FRI, SAT, SUN = range(7)
 routine = routine(
     # Won't work if start time is still on the previous day.
     schedule = [
-        # article(get_time('07:50'), get_time('09:00')),
-        # article(get_time('20:00'), get_time('22:30')),
-        article(get_time('08:20'), get_time('10:30')),
-        article(get_time('19:30'), get_time('20:00')),
+        # article(time('07:50'), time('09:00')),
+        # article(time('20:00'), time('22:30')),
+        article(time('08:20'), time('10:30')),
+        article(time('19:30'), time('20:00')),
     ],
     weekdays = {
         MON: True,
