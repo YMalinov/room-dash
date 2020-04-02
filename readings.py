@@ -8,8 +8,8 @@ from common import read_line_from
 from ui import Label
 
 SERVER_TIMEOUT = aiohttp.ClientTimeout(total = 20) # in seconds
-REFRESH_INTERVAL = 10 # in seconds
-CACHE_LIFE = timedelta(minutes = 20)
+REFRESH_INTERVAL = 5 # in seconds
+CACHE_LIFE = timedelta(minutes = 14)
 
 base_url = read_line_from('sensors_url.txt')
 URLS = [
@@ -20,7 +20,7 @@ URLS = [
 
 KEYS = {
     'client': 'Client',
-    'timestamp_pretty': 'When',
+    'timestamp_pretty': 'Collected',
     # 'bme_humidity': 'Humidity',
     # 'bme_pressure': 'Pressure',
     'ds18_short_temp': 'Outside temp',
@@ -29,6 +29,7 @@ KEYS = {
     'pm25_aqi_label_avg': 'PM2.5 label day avg',
     'pm10_aqi_label': 'PM10 label',
     'pm10_aqi_label_avg': 'PM10 label day avg',
+    'last_update': 'Updated at',
 }
 
 class readings:
@@ -54,13 +55,17 @@ class readings:
     async def update_readings(self):
         outside, inside, avg_outside = await self.get_data()
 
+        self.last_update = datetime.now()
+
         # Add labels per last day average.
         outside['pm25_aqi_label_avg'] = avg_outside['pm25_aqi_label']
         outside['pm10_aqi_label_avg'] = avg_outside['pm10_aqi_label']
 
+        # Also add time of last update
+        inside['last_update'] = self.last_update.strftime('%H:%M:%S')
+
         self.queue.put((Label.rasp_b, self.format(outside)))
         self.queue.put((Label.rasp_c, self.format(inside)))
-        self.last_update = datetime.now()
 
     def cache_old(self):
         now = datetime.now()
@@ -94,7 +99,7 @@ class readings:
                         print('Updated readings @', self.last_update)
 
                         break
-                    except (web.HTTPException, client_ex.ContentTypeError):
+                    except client_ex.ClientError:
 
                         # OK, so maybe spotty Internet connectivity? Display an
                         # error and carry on trying.

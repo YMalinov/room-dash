@@ -8,16 +8,18 @@ CMD = ['vcgencmd', 'display_power']
 
 class monitor:
     def turn_on(self):
-        print('Turning monitor on...')
-
         self.output = True
-        if self.is_rasp: subprocess.run(CMD + ['1'])
+
+        if self.is_rasp:
+            print('Turning monitor on...')
+            subprocess.run(CMD + ['1'])
 
     def turn_off(self):
-        print('Turning monitor off...')
-
         self.output = False
-        if self.is_rasp: subprocess.run(CMD + ['0'])
+
+        if self.is_rasp:
+            print('Turning monitor off...')
+            subprocess.run(CMD + ['0'])
 
     # This method purposefully doesn't take into account the project's actual
     # routine (otherwise it would just return the state of self.output), as the
