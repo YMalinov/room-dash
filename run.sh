@@ -1,8 +1,6 @@
 #!/bin/bash
 
-# The following file is run at each Raspberry boot-up. Wait a bit to ensure
-# that LXDE has fully loaded.
-sleep 3
+# Intended to be run as a systemd user service.
 export RASP_ENV='1'
 
 pip3 install -r /home/pi/src/room-dash/requirements.txt

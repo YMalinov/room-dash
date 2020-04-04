@@ -1,0 +1,14 @@
+[Service]
+ExecStartPre=/bin/sleep 3
+WorkingDirectory=/home/pi/src/room-dash
+ExecStart=/bin/bash /home/pi/src/room-dash/run.sh
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=room-dash
+User=pi
+Group=pi
+After=network-online.target
+Wants=network-online.target
+
+[Install]
+WantedBy=multi-user.target
