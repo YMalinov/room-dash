@@ -4,7 +4,7 @@ from queue import Queue
 from enum import Enum, unique, auto
 
 # will show the time with this offset applied
-offset = timedelta(minutes = 1, seconds = 20)
+offset = timedelta() # timedelta(minutes = 1, seconds = 20)
 time_format = '%H:%M:%S'
 date_format = '%a %b %-d; week %-W of %Y' # hyphens remove the leading zeroes
 
