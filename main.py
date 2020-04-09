@@ -6,8 +6,7 @@ import sys
 import ui
 import os
 
-import common
-from routine import article, routine
+import common as c
 from monitor import monitor
 from readings import readings
 
@@ -17,7 +16,7 @@ RASP_ENV = os.getenv('RASP_ENV', '') == '1'
 
 app = ui.get_app()
 
-monitor = monitor(common.routine, RASP_ENV)
+monitor = monitor(c.routine, RASP_ENV)
 readings = readings(monitor, app.get_queue())
 
 def worker():

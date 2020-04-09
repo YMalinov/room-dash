@@ -1,7 +1,8 @@
 import asyncio
-import os, subprocess
+import subprocess
 from datetime import datetime
-from routine import article, routine
+
+from routine import routine
 
 REFRESH_INTERVAL = 5 # in secs
 CMD = ['vcgencmd', 'display_power']

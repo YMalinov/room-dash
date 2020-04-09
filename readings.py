@@ -1,6 +1,5 @@
 import asyncio
 import aiohttp
-from aiohttp import web
 from aiohttp.client_exceptions import ClientError
 from ssl import SSLError
 from datetime import datetime, timedelta
