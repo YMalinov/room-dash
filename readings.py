@@ -1,7 +1,5 @@
 import asyncio
 import aiohttp
-from aiohttp.client_exceptions import ClientError
-from ssl import SSLError
 from datetime import datetime, timedelta
 
 from common import read_line_from
@@ -99,7 +97,7 @@ class readings:
                         print('Updated readings @', self.last_update)
 
                         break
-                    except (ClientError, SSLError):
+                    except:
 
                         # OK, so maybe spotty Internet connectivity? Display an
                         # error and carry on trying.
