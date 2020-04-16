@@ -97,13 +97,12 @@ class readings:
                         print('Updated readings @', self.last_update)
 
                         break
-                    except:
-
+                    except Exception as e:
                         # OK, so maybe spotty Internet connectivity? Display an
                         # error and carry on trying.
                         self.queue.put((
                             Label.rasp_b,
-                            'Error getting data, try: %i' % (i + 1)
+                            f'Error {type(e)} getting data, try: {i + 1}'
                         ))
 
             await asyncio.sleep(REFRESH_INTERVAL)
