@@ -21,7 +21,7 @@ routine = routine(
         # article(time('07:50'), time('09:00')),
         # article(time('20:00'), time('22:30')),
         article(time('08:20'), time('10:30')),
-        article(time('19:30'), time('20:00')),
+        article(time('19:15'), time('20:00')),
     ],
     weekdays = {
         MON: True,

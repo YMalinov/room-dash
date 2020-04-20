@@ -83,8 +83,6 @@ class readings:
     #   powered (regardless of its routine).
     async def update_state(self):
         while True:
-            now = datetime.now()
-
             monitor_on = self.monitor.status()
             if monitor_on and self.cache_old():
                 tries = 3 # to connect with server
