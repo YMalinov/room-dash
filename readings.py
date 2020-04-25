@@ -12,21 +12,24 @@ CACHE_LIFE = timedelta(minutes = 14)
 base_url = read_line_from('sensors_url.txt')
 URLS = [
     f'{base_url}/get?client=rasp_b&json', # current readings outside
+    f'{base_url}/get?client=rasp_b&json&hours=12', # averages for past half day
+
     f'{base_url}/get?client=rasp_c&json', # current readings inside
-    f'{base_url}/get?client=rasp_b&json&days=1', # averages for past day (outside)
 ]
 
 KEYS = {
     'client': 'Client',
     'timestamp_pretty': 'Collected',
-    # 'bme_humidity': 'Humidity',
-    # 'bme_pressure': 'Pressure',
+    'bme_humidity': 'Humidity',
+    'bme_pressure': 'Pressure',
     'ds18_short_temp': 'Outside temp',
     'ds18_long_temp': 'Inside temp',
-    'pm25_aqi_label': 'PM2.5 label',
-    'pm25_aqi_label_avg': 'PM2.5 label day avg',
-    'pm10_aqi_label': 'PM10 label',
-    'pm10_aqi_label_avg': 'PM10 label day avg',
+    # 'pm25_aqi_label': 'PM2.5 label',
+    # 'pm10_aqi_label': 'PM10 label',
+
+    # 'pm10_aqi_label_avg': 'PM10 label day avg',
+    # 'pm25_aqi_label_avg': 'PM2.5 label day avg',
+    'ds18_short_temp_avg': 'Outside temp avg',
     'last_update': 'Updated at',
 }
 
@@ -51,13 +54,12 @@ class readings:
         return output
 
     async def update_readings(self):
-        outside, inside, avg_outside = await self.get_data()
+        outside, outside_avg, inside = await self.get_data()
 
         self.last_update = datetime.now()
 
         # Add labels per last day average.
-        outside['pm25_aqi_label_avg'] = avg_outside['pm25_aqi_label']
-        outside['pm10_aqi_label_avg'] = avg_outside['pm10_aqi_label']
+        outside['ds18_short_temp_avg'] = outside_avg['ds18_short_temp']
 
         # Also add time of last update
         inside['last_update'] = self.last_update.strftime('%H:%M:%S')
