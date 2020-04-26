@@ -11,8 +11,10 @@ CACHE_LIFE = timedelta(minutes = 14)
 
 base_url = read_line_from('sensors_url.txt')
 URLS = [
+    f'{base_url}/get?client=rasp_a&json', # current readings garage
+
     f'{base_url}/get?client=rasp_b&json', # current readings outside
-    f'{base_url}/get?client=rasp_b&json&hours=12', # averages for past half day
+    f'{base_url}/get/min?client=rasp_b&json&hours=12', # min for past half day
 
     f'{base_url}/get?client=rasp_c&json', # current readings inside
 ]
@@ -26,10 +28,12 @@ KEYS = {
     'ds18_long_temp': 'Inside temp',
     # 'pm25_aqi_label': 'PM2.5 label',
     # 'pm10_aqi_label': 'PM10 label',
+    'mq7_carb_mono': 'Garage CO in ppm',
 
     # 'pm10_aqi_label_avg': 'PM10 label day avg',
     # 'pm25_aqi_label_avg': 'PM2.5 label day avg',
-    'ds18_short_temp_avg': 'Outside temp avg',
+    # 'ds18_short_temp_avg': 'Outside temp avg',
+    'ds18_short_temp_min': 'Outside temp min',
     'last_update': 'Updated at',
 }
 
@@ -54,12 +58,15 @@ class readings:
         return output
 
     async def update_readings(self):
-        outside, outside_avg, inside = await self.get_data()
+        garage, outside, outside_min, inside = await self.get_data()
 
         self.last_update = datetime.now()
 
-        # Add labels per last day average.
-        outside['ds18_short_temp_avg'] = outside_avg['ds18_short_temp']
+        # Add labels per last day average
+        outside['ds18_short_temp_min'] = outside_min['ds18_short_temp']
+
+        # Put CO readings from garage
+        inside['mq7_carb_mono'] = garage['mq7_carb_mono']
 
         # Also add time of last update
         inside['last_update'] = self.last_update.strftime('%H:%M:%S')
