@@ -7,21 +7,18 @@ from ui import Label
 
 SERVER_TIMEOUT = aiohttp.ClientTimeout(total = 20) # in seconds
 REFRESH_INTERVAL = 5 # in seconds
+RETRIES = 5
 CACHE_LIFE = timedelta(minutes = 14)
 
 base_url = read_line_from('sensors_url.txt')
 URLS = [
-    f'{base_url}/get?client=rasp_a&json', # current readings garage
+    f'{base_url}/get?json', # current readings
 
-    f'{base_url}/get?client=rasp_b&json', # current readings outside
     f'{base_url}/get/min?client=rasp_b&json&hours=12', # min for past half day
-
-    f'{base_url}/get?client=rasp_c&json', # current readings inside
+    f'{base_url}/get/min?client=rasp_c&json&hours=12', # min for past half day
 ]
 
-KEYS = {
-    'client': 'Client',
-    'timestamp_pretty': 'Collected',
+COL1 = {
     'bme_humidity': 'Humidity',
     'bme_pressure': 'Pressure',
     'ds18_short_temp': 'Outside temp',
@@ -29,50 +26,80 @@ KEYS = {
     # 'pm25_aqi_label': 'PM2.5 label',
     # 'pm10_aqi_label': 'PM10 label',
     'mq7_carb_mono': 'Garage CO in ppm',
+    '': '', # interpreted as empty line
+    'ds18_short_temp_min': 'Outside temp min 1/2 day',
+    'ds18_long_temp_min': 'Inside temp min 1/2 day',
+}
 
-    # 'pm10_aqi_label_avg': 'PM10 label day avg',
-    # 'pm25_aqi_label_avg': 'PM2.5 label day avg',
-    # 'ds18_short_temp_avg': 'Outside temp avg',
-    'ds18_short_temp_min': 'Outside temp min',
+COL2 = {
+    'timestamp_pretty_rasp_a': 'rasp-a read',
+    'timestamp_pretty_rasp_b': 'rasp-b read',
+    'timestamp_pretty_rasp_c': 'rasp-c read',
+    '': '',
     'last_update': 'Updated at',
 }
 
 class readings:
+
+    async def get_url(self, url, session):
+        for i in range(RETRIES):
+            try:
+                async with session.get(url, timeout=SERVER_TIMEOUT) as resp:
+                    return await resp.json()
+            except Exception as e:
+                if i + 1 == RETRIES: raise
+                continue
+
     async def get_data(self):
         results = []
         async with aiohttp.ClientSession() as session:
             for url in URLS:
-                async with session.get(url, timeout = SERVER_TIMEOUT) as resp:
-                    results.append(await resp.json())
+                results.append(await self.get_url(url, session))
 
         return results
 
-    def format(self, json):
+    def flatten(self, json):
+        output = {}
+        for entry in json:
+            for k, v in entry.items():
+                output.update({k: v})
+
+        return output
+
+    def format(self, json, col):
         output = ''
 
-        # get sorting from KEYS
-        for key, value in KEYS.items():
+        # get sorting from col
+        for key, value in col.items():
             if key in json:
                 output += '%s: %s\n' % (value, json[key])
+            elif not key:
+                output += '\n'
 
         return output
 
     async def update_readings(self):
-        garage, outside, outside_min, inside = await self.get_data()
-
+        readouts, min_rasp_b, min_rasp_c = await self.get_data()
         self.last_update = datetime.now()
 
-        # Add labels per last day average
-        outside['ds18_short_temp_min'] = outside_min['ds18_short_temp']
+        col1 = col2 = {}
 
-        # Put CO readings from garage
-        inside['mq7_carb_mono'] = garage['mq7_carb_mono']
+        col1.update({**self.flatten(readouts)})
+
+        # Add labels per last day average
+        col1['ds18_short_temp_min'] = min_rasp_b[0]['ds18_short_temp']
+        col1['ds18_long_temp_min'] = min_rasp_c[0]['ds18_long_temp']
+
+        for readout in readouts:
+            k = 'timestamp_pretty_' + readout['client']
+            v = readout['timestamp_pretty']
+            col2.update({k: v})
 
         # Also add time of last update
-        inside['last_update'] = self.last_update.strftime('%H:%M:%S')
+        col2['last_update'] = self.last_update.strftime('%H:%M:%S')
 
-        self.queue.put((Label.rasp_b, self.format(outside)))
-        self.queue.put((Label.rasp_c, self.format(inside)))
+        self.queue.put((Label.col1, self.format(col1, COL1)))
+        self.queue.put((Label.col2, self.format(col2, COL2)))
 
     def cache_old(self):
         now = datetime.now()
@@ -94,23 +121,23 @@ class readings:
         while True:
             monitor_on = self.monitor.status()
             if monitor_on and self.cache_old():
-                tries = 3 # to connect with server
-                for i in range(tries):
-                    try:
-                        print('Readings cache expired @', datetime.now())
+                try:
+                    print('Readings cache expired @', datetime.now())
 
-                        await self.update_readings()
+                    await self.update_readings()
 
-                        print('Updated readings @', self.last_update)
+                    print('Updated readings @', self.last_update)
 
-                        break
-                    except Exception as e:
-                        # OK, so maybe spotty Internet connectivity? Display an
-                        # error and carry on trying.
-                        self.queue.put((
-                            Label.rasp_b,
-                            f'Error {type(e)} getting data, try: {i + 1}'
-                        ))
+                    break
+                except Exception as e:
+                    # OK, so maybe spotty Internet connectivity? Display an
+                    # error and carry on trying.
+                    self.queue.put((
+                        Label.row4,
+                        f'Error {type(e)} getting data, will retry in ' +
+                            f'{REFRESH_INTERVAL} seconds'
+                    ))
+                    raise
 
             await asyncio.sleep(REFRESH_INTERVAL)
 

@@ -12,8 +12,9 @@ date_format = '%a %b %-d; week %-W of %Y' # hyphens remove the leading zeroes
 class Label(Enum):
     clock = auto()
     date = auto()
-    rasp_b = auto()
-    rasp_c = auto()
+    col1 = auto()
+    col2 = auto()
+    row4 = auto()
 
 def get_root():
     root = tk.Tk()
@@ -24,7 +25,7 @@ def get_root():
     root.rowconfigure(1, weight = 1) # clock
     root.rowconfigure(2, weight = 1) # date
     root.rowconfigure(3, weight = 1) # readings
-    root.rowconfigure(4, weight = 1) # empty
+    root.rowconfigure(4, weight = 1) # errors
 
     root.columnconfigure(0, weight = 1)
     root.columnconfigure(1, weight = 1)
@@ -49,6 +50,8 @@ def get_app():
             self.construct_clock()
             self.construct_date()
             self.construct_readings()
+            self.construct_row4()
+
             self.refresh_ui()
 
         def construct_clock(self):
@@ -82,28 +85,38 @@ def get_app():
             update_date()
 
         def construct_readings(self):
-            self.rasp_b = tk.Label(self.master,
+            self.col1 = tk.Label(self.master,
                 font = ('calibri', 20),
                 background = 'black',
                 foreground = 'white')
 
-            self.rasp_b.config(justify = tk.LEFT)
-            self.rasp_b.grid(row = 3, column = 0, sticky = tk.N)
+            self.col1.config(justify = tk.LEFT)
+            self.col1.grid(row = 3, column = 0, sticky = tk.N)
 
-            self.rasp_c = tk.Label(self.master,
+            self.col2 = tk.Label(self.master,
                 font = ('calibri', 20),
                 background = 'black',
                 foreground = 'white')
 
-            self.rasp_c.config(justify = tk.LEFT)
-            self.rasp_c.grid(row = 3, column = 1, sticky = tk.N)
+            self.col2.config(justify = tk.LEFT)
+            self.col2.grid(row = 3, column = 1, sticky = tk.N)
+
+        def construct_row4(self):
+            self.row4 = tk.Label(self.master,
+                font = ('calibri', 20),
+                background = 'black',
+                foreground = 'white')
+
+            self.row4.config(justify = tk.LEFT)
+            self.row4.grid(row = 4, column = 0, sticky = tk.N)
 
         def process_incoming(self):
             mapping = {
                 Label.clock: self.clock,
                 Label.date: self.date,
-                Label.rasp_b: self.rasp_b,
-                Label.rasp_c: self.rasp_c,
+                Label.col1: self.col1,
+                Label.col2: self.col2,
+                Label.row4: self.row4
             }
 
             while self.queue.qsize():
