@@ -47,7 +47,10 @@ class readings:
                 async with session.get(url, timeout=SERVER_TIMEOUT) as resp:
                     return await resp.json()
             except Exception as e:
-                if i + 1 == RETRIES: raise
+                if i + 1 == RETRIES:
+                    print('Exceeded retries, raising exception...')
+                    raise
+
                 continue
 
     async def get_data(self):
@@ -137,7 +140,6 @@ class readings:
                         f'Error {type(e)} getting data, will retry in ' +
                             f'{REFRESH_INTERVAL} seconds'
                     ))
-                    raise
 
             await asyncio.sleep(REFRESH_INTERVAL)
 
