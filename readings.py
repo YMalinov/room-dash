@@ -14,8 +14,8 @@ base_url = read_line_from('sensors_url.txt')
 URLS = [
     f'{base_url}/get?json', # current readings
 
-    f'{base_url}/get/min?client=rasp_b&json&hours=12', # min for past half day
-    f'{base_url}/get/min?client=rasp_c&json&hours=12', # min for past half day
+    f'{base_url}/get/min?json&client=rasp_b&hours=12', # min for past half day
+    f'{base_url}/get/min?json&client=rasp_c&hours=12', # min for past half day
 ]
 
 COL1 = {
@@ -130,15 +130,13 @@ class readings:
                     await self.update_readings()
 
                     print('Updated readings @', self.last_update)
-
-                    break
                 except Exception as e:
                     # OK, so maybe spotty Internet connectivity? Display an
                     # error and carry on trying.
                     self.queue.put((
                         Label.row4,
-                        f'Error {type(e)} getting data, will retry in ' +
-                            f'{REFRESH_INTERVAL} seconds'
+                        'Error %s getting data, will retry in %d seconds' %
+                            (type(e), REFRESH_INTERVAL)
                     ))
 
             await asyncio.sleep(REFRESH_INTERVAL)
