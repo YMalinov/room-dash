@@ -82,7 +82,7 @@ class readings:
         return output
 
     async def update_readings(self):
-        readouts, min_rasp_b, min_rasp_c = await self.get_data()
+        readouts, min_rasp_a, min_rasp_c = await self.get_data()
         self.last_update = datetime.now()
 
         col1 = col2 = {}
@@ -90,7 +90,7 @@ class readings:
         col1.update({**self.flatten(readouts)})
 
         # Add labels per last day average
-        col1['ds18_short_temp_min'] = min_rasp_b[0]['ds18_short_temp']
+        col1['ds18_short_temp_min'] = min_rasp_a[0]['ds18_short_temp']
         col1['ds18_long_temp_min'] = min_rasp_c[0]['ds18_long_temp']
 
         for readout in readouts:
