@@ -14,7 +14,7 @@ base_url = read_line_from('sensors_url.txt')
 URLS = [
     f'{base_url}/get?json', # current readings
 
-    f'{base_url}/get/min?json&client=rasp_b&hours=12', # min for past half day
+    f'{base_url}/get/min?json&client=rasp_a&hours=12', # min for past half day
     f'{base_url}/get/min?json&client=rasp_c&hours=12', # min for past half day
 ]
 
