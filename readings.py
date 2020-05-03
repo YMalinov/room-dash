@@ -130,6 +130,10 @@ class readings:
                     await self.update_readings()
 
                     print('Updated readings @', self.last_update)
+
+                    # If we were successful in getting readings data, clear the
+                    # error row.
+                    self.queue.put((Label.row4, ''))
                 except Exception as e:
                     # OK, so maybe spotty Internet connectivity? Display an
                     # error and carry on trying.

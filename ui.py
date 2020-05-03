@@ -108,7 +108,7 @@ def get_app():
                 foreground = 'white')
 
             self.row4.config(justify = tk.LEFT)
-            self.row4.grid(row = 4, column = 0, sticky = tk.N)
+            self.row4.grid(row = 4, columnspan = 2, sticky = tk.N)
 
         def process_incoming(self):
             mapping = {
