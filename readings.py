@@ -14,25 +14,25 @@ base_url = read_line_from('sensors_url.txt')
 URLS = [
     f'{base_url}/get?json', # current readings
 
-    f'{base_url}/get/min?json&client=rasp_a&hours=12', # min for past half day
+    f'{base_url}/get/min?json&client=rasp_b&hours=12', # min for past half day
     f'{base_url}/get/min?json&client=rasp_c&hours=12', # min for past half day
 ]
 
 COL1 = {
-    'bme_humidity': 'Humidity',
-    'bme_pressure': 'Pressure',
-    'ds18_short_temp': 'Outside temp',
-    'ds18_long_temp': 'Inside temp',
+    'bme_humidity': 'Living room humidity',
+    'bme_pressure': 'Living room pressure',
+    'ds18_short_temp': 'Living room temp',
+    'ds18_long_temp': 'Bedroom temp',
     # 'pm25_aqi_label': 'PM2.5 label',
     # 'pm10_aqi_label': 'PM10 label',
-    'mq7_carb_mono': 'Garage CO in ppm',
+    # 'mq7_carb_mono': 'Garage CO in ppm',
     '': '', # interpreted as empty line
-    'ds18_short_temp_min': 'Outside temp min 1/2 day',
-    'ds18_long_temp_min': 'Inside temp min 1/2 day',
+    'ds18_short_temp_min': 'Living room temp min 1/2 day',
+    'ds18_long_temp_min': 'Bedroom temp min 1/2 day',
 }
 
 COL2 = {
-    'timestamp_pretty_rasp_a': 'rasp-a read',
+    # 'timestamp_pretty_rasp_a': 'rasp-a read',
     'timestamp_pretty_rasp_b': 'rasp-b read',
     'timestamp_pretty_rasp_c': 'rasp-c read',
     '': '',
@@ -82,7 +82,7 @@ class readings:
         return output
 
     async def update_readings(self):
-        readouts, min_rasp_a, min_rasp_c = await self.get_data()
+        readouts, min_rasp_b, min_rasp_c = await self.get_data()
         self.last_update = datetime.now()
 
         col1 = col2 = {}
@@ -90,7 +90,7 @@ class readings:
         col1.update({**self.flatten(readouts)})
 
         # Add labels per last day average
-        col1['ds18_short_temp_min'] = min_rasp_a[0]['ds18_short_temp']
+        col1['ds18_short_temp_min'] = min_rasp_b[0]['ds18_short_temp']
         col1['ds18_long_temp_min'] = min_rasp_c[0]['ds18_long_temp']
 
         for readout in readouts:
